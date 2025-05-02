@@ -1,8 +1,8 @@
 
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html>
 <head>
-  <title> Heat-Wave Predictor (Joshi 2025)</title>
+  <title>Heat-Wave Predictor (Joshi 2025)</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
     body {
@@ -22,12 +22,8 @@
       align-items: center;
       gap: 20px;
       padding: 2px 0;
-      background-color: #e1f7d5; /* Optional background color */
-      border-bottom: 3px solid #1f77b4; /* Optional border for styling */
-    }
-    #header img {
-      height: 40px; /* Adjust based on logo size */
-      width: auto;
+      background-color: #e1f7d5;
+      border-bottom: 3px solid #1f77b4;
     }
     #header h1 {
       font-size: 24px;
@@ -40,7 +36,6 @@
       gap: 20px;
       align-items: center;
       flex-wrap: wrap;
-      flex: 1;
     }
     label {
       font-weight: bold;
@@ -64,29 +59,41 @@
       font-weight: bold;
       color: #444;
     }
-    #heatmap {
+    #heatmap, #heatwave-probability {
       width: 100%;
       max-width: 900px;
       height: 600px;
       border: 1px solid #ddd;
       border-radius: 10px;
       overflow: hidden;
+      margin-top: 20px;
     }
     #download-btn {
       margin-top: 15px;
     }
-     
-    #research-info {
-      position: fixed;
-      right: 20px;
-      top: 150px;
-      width: 300px;
-      background-color: #e1f7d5;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      z-index: 10;
+    #forecast-date {
+      font-style: italic;
+      margin-top: -10px;
     }
+    
+    #research-info {
+  position: relative; /* Change from fixed position */
+  width: 100%;
+  background-color: #e1f7d5;
+  padding: 15px 15px 15px 15px;
+ ;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px; /* Add space below it */
+}
+
+@media (max-width: 600px) {
+  #research-info {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+  }
+}
     #research-info h3 {
       margin-top: 0;
     }
@@ -97,51 +104,49 @@
 </head>
 <body>
   <div id="header">
-    
-    <h1>Heat-Wave Predictor by Yash Joshi </h1>
+    <h1>Heat-Wave Predictor by Yash Joshi</h1>
   </div>
-  
+
   <div id="research-info">
-    <h3>Research Paper</h3>
-    <p>This temperature heatmap and forecasting tool is based on methodologies discussed in the research paper titled <strong>"Prediction of regional heat waves using Hybrid LSTM approach"</strong> by Yash Joshi et.al<br> This study is a part of M-Tech Project under DR SR kannan conducted at IIT Bhubaneshwar.</p>
-    <p>For more details, you can read the full research paper: <a href="https://drive.google.com/file/d/1237mQWaa4qvh7VelEPUmZhDkiCLnXcII/view?usp=sharing" target="_blank">Read Research Paper</a></p>
+    <h3 style="padding-left: 30px;">Research Paper</h3>
+    <p style="padding-left: 30px;">This tool is based on the study <strong>"Prediction of regional heat waves using Hybrid LSTM approach"</strong> by Yash Joshi et al. (M.Tech Project, IIT Bhubaneswar under Dr. SR Kannan).</p>
+    <p style="padding-left: 30px;">Read the paper: <a href="https://drive.google.com/file/d/1237mQWaa4qvh7VelEPUmZhDkiCLnXcII/view?usp=sharing" target="_blank">Research Link</a></p>
   </div>
-
-  <div>
-    
-
-    <div id="controls">
-      <div>
-        <label for="leadDay">Select Day Lead:</label>
-        <select id="leadDay">
-          <option value="0">Day 1</option>
-          <option value="1">Day 2</option>
-          <option value="2">Day 3</option>
-        </select>
-      </div>
-
-      <div>
-        <label for="lat">Latitude:</label>
-        <input type="number" id="lat" step="0.01" placeholder="e.g., 20.75">
-      </div>
-      <div>
-        <label for="lon">Longitude:</label>
-        <input type="number" id="lon" step="0.01" placeholder="e.g., 84.25">
-      </div>
-      <button onclick="fetchSinglePointTemp()">Get Temp at Point</button>
-      <div id="result"></div>
+<br>
+  <div id="controls">
+    <div>
+      <label for="leadDay">Select Day Lead:</label>
+      <select id="leadDay">
+        <option value="1">Day 1</option>
+        <option value="2">Day 2</option>
+        <option value="3">Day 3</option>
+      </select>
     </div>
-
-    <div id="heatmap"></div>
-
-    <button id="download-btn" onclick="downloadCSV()">Download CSV</button>
+    <div>
+      <label for="lat">Latitude:</label>
+      <input type="number" id="lat" step="0.01" placeholder="e.g., 20.75">
+    </div>
+    <div>
+      <label for="lon">Longitude:</label>
+      <input type="number" id="lon" step="0.01" placeholder="e.g., 84.25">
+    </div>
+    <button onclick="fetchSinglePointTemp()">Get Temp at Point</button>
+    <div id="result"></div>
   </div>
+
+  <div id="forecast-date"></div>
+
+  <div id="heatmap"></div>
+  <div id="heatwave-probability"></div>
+  <button id="download-btn" onclick="downloadCSV()">Download CSV</button>
 
   <script>
     const latStart = 19.0, latEnd = 22.0;
     const lonStart = 82.0, lonEnd = 86.0;
     const step = 0.25;
-    let lats = [], lons = [], z = [];
+    let lats = [], lons = [], z = [], probZ = [];
+    let currentLead = 0;
+    let spatialAvg = 0;
 
     for (let lat = latStart; lat <= latEnd; lat += step) {
       lats.push(parseFloat(lat.toFixed(2)));
@@ -150,13 +155,22 @@
       lons.push(parseFloat(lon.toFixed(2)));
     }
 
-    let currentLead = 0;
+    function updateForecastDate(lead) {
+      const today = new Date();
+      today.setDate(today.getDate() + lead + 1); // Lead 0 => tomorrow
+      const forecastDate = today.toDateString();
+      document.getElementById('forecast-date').textContent = `Forecast for: ${forecastDate}`;
+    }
 
     function fetchHeatmapData(dayLead = 0) {
       currentLead = dayLead;
+      updateForecastDate(dayLead);
+
       z = [];
+      probZ = [];
       let total = lats.length * lons.length;
       let completed = 0;
+      let tempSum = 0, count = 0;
 
       lats.forEach((lat, i) => {
         z[i] = [];
@@ -166,18 +180,45 @@
           fetch(url)
             .then(res => res.json())
             .then(data => {
-              const temps = data.daily?.temperature_2m_max || [];
-              z[i][j] = temps[dayLead] || null;
+              const temp = data.daily?.temperature_2m_max?.[dayLead] ?? null;
+              z[i][j] = temp;
+
+              if (temp !== null) {
+                tempSum += temp;
+                count++;
+              }
             })
             .catch(() => {
               z[i][j] = null;
             })
             .finally(() => {
               completed++;
-              if (completed === total) renderHeatmap();
+              if (completed === total) {
+                spatialAvg = tempSum / count;
+                computeProbabilityMap();
+                renderHeatmap();
+                renderProbabilityContour();
+              }
             });
         });
       });
+    }
+
+    function computeProbabilityMap() {
+      probZ = [];
+      for (let i = 0; i < lats.length; i++) {
+        probZ[i] = [];
+        for (let j = 0; j < lons.length; j++) {
+          const temp = z[i][j];
+          if (temp !== null) {
+            const deviation = temp - spatialAvg;
+            const prob = 1 / (1 + Math.exp(-0.3 * (deviation )));
+            probZ[i][j] = Math.round(prob * 100); // percentage
+          } else {
+            probZ[i][j] = null;
+          }
+        }
+      }
     }
 
     function renderHeatmap() {
@@ -189,20 +230,40 @@
         zsmooth: 'best',
         colorscale: 'YlOrRd',
         reversescale: true,
-        colorbar: {
-          title: '°C',
-          titleside: 'right'
-        }
+        colorbar: { title: '°C' }
       }];
 
       const layout = {
         xaxis: { title: 'Longitude' },
         yaxis: { title: 'Latitude' },
-        margin: { t: 40 },
         title: 'Max Temperature Forecast'
       };
 
       Plotly.newPlot('heatmap', data, layout);
+    }
+
+    function renderProbabilityContour() {
+      const data = [{
+        z: probZ,
+        x: lons,
+        y: lats,
+        type: 'contour',
+        colorscale: 'Reds',
+        contours: {
+          coloring: 'heatmap',
+          showlabels: true,
+          labelfont: { size: 12, color: 'black' }
+        },
+        colorbar: { title: 'Probability (%)' }
+      }];
+
+      const layout = {
+        xaxis: { title: 'Longitude' },
+        yaxis: { title: 'Latitude' },
+        title: 'Heatwave Probability (Deviation > 4.5°C)'
+      };
+
+      Plotly.newPlot('heatwave-probability', data, layout);
     }
 
     function fetchSinglePointTemp() {
@@ -220,11 +281,12 @@
       fetch(url)
         .then(res => res.json())
         .then(data => {
-          const temps = data.daily?.temperature_2m_max || [];
-          const temp = temps[lead];
+          const temp = data.daily?.temperature_2m_max?.[lead];
+          const date = new Date();
+          date.setDate(date.getDate() + lead + 1);
           document.getElementById('result').textContent =
             temp !== undefined
-              ? `Temperature at (${lat}, ${lon}) on Day ${lead + 1}: ${temp} °C`
+              ? `Temperature at (${lat}, ${lon}) on ${date.toDateString()}: ${temp} °C`
               : 'Data not available';
         })
         .catch(() => {
@@ -242,7 +304,6 @@
           }
         }
       }
-
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -262,5 +323,7 @@
   </script>
 </body>
 </html>
+
+
 
 
