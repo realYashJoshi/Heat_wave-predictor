@@ -134,7 +134,9 @@
   </div>
 
   <div id="forecast-date"></div>
-
+<div id="loading-message" style="display: none; font-weight: bold; color: #1f77b4; margin-top: 10px;">
+  Please wait, the model results are being loaded...
+</div>
   <div id="heatmap"></div>
   <div id="heatwave-probability"></div>
   <button id="download-btn" onclick="downloadCSV()">Download CSV</button>
@@ -164,7 +166,10 @@
     function fetchHeatmapData(dayLead = 0) {
       currentLead = dayLead;
       updateForecastDate(dayLead);
-
+      document.getElementById('loading-message').style.display = 'block';
+  setTimeout(() => {
+    document.getElementById('loading-message').style.display = 'none';
+  }, 15000);
       z = [];
       probZ = [];
       let total = lats.length * lons.length;
