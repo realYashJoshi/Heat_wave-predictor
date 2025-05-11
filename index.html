@@ -175,7 +175,8 @@
       lats.forEach((lat, i) => {
         z[i] = [];
         lons.forEach((lon, j) => {
-          const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max&forecast_days=3&timezone=auto`;
+          // const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max&forecast_days=3&timezone=auto`;
+          const url = `https://backend-heatwave.onrender.com/api/forecast?lat=${lat}&lon=${lon}&days=3`;
 
           fetch(url)
             .then(res => res.json())
@@ -276,7 +277,8 @@
         return;
       }
 
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max&forecast_days=3&timezone=auto`;
+      // const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max&forecast_days=3&timezone=auto`;
+      const url = `https://backend-heatwave.onrender.com/api/forecast?lat=${lat}&lon=${lon}&days=3`;
 
       fetch(url)
         .then(res => res.json())
